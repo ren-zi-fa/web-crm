@@ -1,0 +1,26 @@
+services:
+  database:
+    container_name: crm
+    image: mysql:8.4
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_USERNAME: ${DB_USERNAME}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    volumes:
+      - mysql_dev:/var/lib/mysql
+
+  phpmyadmin:
+    container_name: crm-phpmyadmin
+    image: phpmyadmin:latest
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+    depends_on:
+      - database
+
+volumes:
+  mysql_dev:
