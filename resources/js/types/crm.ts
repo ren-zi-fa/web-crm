@@ -136,3 +136,32 @@ export type TaskItem = {
         name: string;
     } | null;
 };
+
+export type DashboardKpi = {
+    openPipelineValue: number;
+    openDeals: number;
+    wonValueThisMonth: number;
+    wonDealsThisMonth: number;
+    overdueTasks: number;
+};
+
+export type RevenuePoint = {
+    label: string;
+    value: number;
+};
+
+export type PipelineStagePoint = {
+    name: string;
+    color: string | null;
+    count: number;
+    value: number;
+};
+
+export type AttentionDeal = {
+    id: number;
+    title: string;
+    value: string;
+    expected_close_date: string | null;
+    contact: UserRef | null;
+    stage: StageRef | null;
+};

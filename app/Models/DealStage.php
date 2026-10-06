@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $color
  * @property bool $is_won
  * @property bool $is_lost
+ * @property int $deals_count
+ * @property string|null $deals_sum_value
  */
 #[Fillable(['name', 'slug', 'sort_order', 'color', 'is_won', 'is_lost'])]
 class DealStage extends Model
