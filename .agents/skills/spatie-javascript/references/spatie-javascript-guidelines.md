@@ -24,7 +24,7 @@ function saveUserSession(userSession) {
 }
 
 // Acceptable — short name in single-line arrow
-userSessions.forEach(s => saveUserSession(s));
+userSessions.forEach((s) => saveUserSession(s));
 ```
 
 ## Comparisons
@@ -67,7 +67,7 @@ const object = {
 
 // Avoid
 const object = {
-    handleClick: function(event) {
+    handleClick: function (event) {
         // ...
     },
 };

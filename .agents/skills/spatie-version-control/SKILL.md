@@ -3,7 +3,7 @@ name: spatie-version-control
 description: Apply Spatie's version control conventions when creating commits, branches, pull requests, or managing Git repositories; use for naming repos, writing commit messages, choosing branch strategies, and merging code.
 license: MIT
 metadata:
-  author: Spatie
+    author: Spatie
 ---
 
 # Spatie Version Control Guidelines

@@ -4,20 +4,12 @@
         "laravel-boost": {
             "type": "local",
             "enabled": true,
-            "command": [
-                "php",
-                "artisan",
-                "boost:mcp"
-            ]
+            "command": ["php", "artisan", "boost:mcp"]
         },
         "mysql": {
             "type": "local",
             "enabled": true,
-            "command": [
-                "npx",
-                "-y",
-                "@benborla29/mcp-server-mysql"
-            ],
+            "command": ["npx", "-y", "@benborla29/mcp-server-mysql"],
             "environment": {
                 "MYSQL_HOST": "{env:DB_HOST}",
                 "MYSQL_PORT": "{env:DB_PORT}",

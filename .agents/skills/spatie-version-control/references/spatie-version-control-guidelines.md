@@ -5,18 +5,21 @@
 ### Site source code
 
 Use the main domain name in lowercase, without `www`:
+
 - Good: `spatie.be`
 - Bad: `https://www.spatie.be`, `www.spatie.be`, `Spatie.be`
 
 ### Subdomains
 
 Include the subdomain in the repo name:
+
 - Good: `guidelines.spatie.be`
 - Bad: `spatie.be-guidelines`
 
 ### Packages and other projects
 
 Use kebab-case:
+
 - Good: `laravel-backup`, `spoon`
 - Bad: `LaravelBackup`, `Spoon`
 

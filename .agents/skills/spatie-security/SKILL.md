@@ -3,7 +3,7 @@ name: spatie-security
 description: Apply Spatie's security guidelines when configuring applications, databases, servers, credentials, or signed Git commits, or when reviewing code for security concerns; use for SSL setup, CSRF protection, password hashing, database permissions, and server hardening.
 license: MIT
 metadata:
-  author: Spatie
+    author: Spatie
 ---
 
 # Spatie Security Guidelines

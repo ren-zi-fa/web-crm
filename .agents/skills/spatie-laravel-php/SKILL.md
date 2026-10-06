@@ -3,7 +3,7 @@ name: spatie-laravel-php
 description: Apply Spatie's Laravel and PHP coding standards for any task that creates, edits, reviews, refactors, or formats Laravel/PHP code or Blade templates; use for controllers, Eloquent models, routes, config, validation, migrations, tests, and related files to align with Laravel conventions and PSR-12.
 license: MIT
 metadata:
-  author: Spatie
+    author: Spatie
 ---
 
 # Spatie Laravel & PHP Guidelines
@@ -47,6 +47,7 @@ Apply Spatie's Laravel and PHP guidelines to keep code style consistent and Lara
 ## Do and Don't
 
 Do:
+
 - Use kebab-case URLs, camelCase route names, and camelCase route parameters.
 - Use tuple notation for routes: `[Controller::class, 'method']`.
 - Use plural resource names for controllers (`PostsController`).
@@ -57,6 +58,7 @@ Do:
 - Use PascalCase for enum values and class constants.
 
 Don't:
+
 - Add docblocks when full type hints already exist.
 - Use fully qualified classnames in docblocks.
 - Use `final` or `readonly` by default.
