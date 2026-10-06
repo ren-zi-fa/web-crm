@@ -7,7 +7,7 @@ export default function AppLogo() {
 
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-md 1 text-sidebar-primary-foreground">
+            <div className="1 flex aspect-square size-8 items-center justify-center overflow-hidden rounded-md text-sidebar-primary-foreground">
                 {settings?.logo_url ? (
                     <img
                         src={settings.logo_url}

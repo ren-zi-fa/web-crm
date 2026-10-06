@@ -50,7 +50,7 @@ class HandleInertiaRequests extends Middleware
     /**
      * Share the application branding configuration with every response.
      *
-     * @return array<string, string|null>
+     * @return array<string, mixed>
      */
     protected function sharedSettings(): array
     {
@@ -61,6 +61,9 @@ class HandleInertiaRequests extends Middleware
             'logo_url' => Setting::logoUrl(),
             'theme_primary' => $primary,
             'theme_primary_foreground' => filled($primary) ? Setting::contrastForeground($primary) : null,
+            'theme_intensity' => (int) Setting::get('theme_intensity', '50'),
+            'theme_sidebar_tinted' => Setting::get('theme_sidebar_tinted', '1') === '1',
+            'theme_palette' => Setting::themePalette(),
         ];
     }
 }

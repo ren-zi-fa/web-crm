@@ -8,6 +8,12 @@ export type AppSettings = {
     logo_url: string | null;
     theme_primary: string | null;
     theme_primary_foreground: string | null;
+    theme_intensity: number;
+    theme_sidebar_tinted: boolean;
+    theme_palette: {
+        light: Record<string, string>;
+        dark: Record<string, string>;
+    };
 };
 
 export type UserRef = {

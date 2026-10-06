@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { contrastForeground } from '@/lib/color';
+import { derivePalette } from '@/lib/color';
 import { cn } from '@/lib/utils';
 import { edit as editBranding } from '@/routes/branding';
 
@@ -30,15 +30,25 @@ type Props = {
     appName: string;
     logoUrl: string | null;
     themePrimary: string | null;
+    themeIntensity: number;
+    themeSidebarTinted: boolean;
 };
 
-export default function Branding({ appName, logoUrl, themePrimary }: Props) {
+export default function Branding({
+    appName,
+    logoUrl,
+    themePrimary,
+    themeIntensity,
+    themeSidebarTinted,
+}: Props) {
     const { data, setData, post, processing, errors, reset, progress } =
         useForm({
             app_name: appName,
             logo: null as File | null,
             remove_logo: false,
             theme_primary: themePrimary ?? '',
+            theme_intensity: themeIntensity,
+            theme_sidebar_tinted: themeSidebarTinted,
         });
 
     const logoPreview = useMemo(() => {
@@ -48,6 +58,19 @@ export default function Branding({ appName, logoUrl, themePrimary }: Props) {
 
         return data.remove_logo ? null : logoUrl;
     }, [data.logo, data.remove_logo, logoUrl]);
+
+    const preview = useMemo(
+        () =>
+            derivePalette(
+                data.theme_primary || null,
+                data.theme_intensity,
+                data.theme_sidebar_tinted,
+            ).light,
+        [data.theme_primary, data.theme_intensity, data.theme_sidebar_tinted],
+    );
+
+    const isPreviewActive = Object.keys(preview).length > 0;
+    const textColor = 'oklch(0.145 0 0)';
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -60,7 +83,6 @@ export default function Branding({ appName, logoUrl, themePrimary }: Props) {
     };
 
     const primary = data.theme_primary || '#4f46e5';
-    const foreground = contrastForeground(primary);
 
     return (
         <>
@@ -148,7 +170,7 @@ export default function Branding({ appName, logoUrl, themePrimary }: Props) {
                     <Heading
                         variant="small"
                         title="Tema warna"
-                        description="Pilih warna utama yang digunakan di seluruh aplikasi"
+                        description="Warna brand dipakai untuk tombol dan diselaraskan ke latar aplikasi"
                     />
 
                     <div className="flex flex-wrap gap-2">
@@ -204,23 +226,118 @@ export default function Branding({ appName, logoUrl, themePrimary }: Props) {
 
                     <InputError message={errors.theme_primary} />
 
-                    <div className="flex flex-col gap-2">
+                    <div className="grid gap-3">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="theme_intensity">
+                                Intensitas latar
+                            </Label>
+                            <span className="text-sm text-muted-foreground">
+                                {data.theme_intensity}%
+                            </span>
+                        </div>
+                        <input
+                            id="theme_intensity"
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={data.theme_intensity}
+                            onChange={(event) =>
+                                setData(
+                                    'theme_intensity',
+                                    Number(event.target.value),
+                                )
+                            }
+                            className="w-full accent-primary"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            Semakin tinggi, semakin kuat warna brand menyerap ke
+                            latar dan kartu.
+                        </p>
+                        <InputError message={errors.theme_intensity} />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Checkbox
+                            id="theme_sidebar_tinted"
+                            checked={data.theme_sidebar_tinted}
+                            onCheckedChange={(checked) =>
+                                setData(
+                                    'theme_sidebar_tinted',
+                                    checked === true,
+                                )
+                            }
+                        />
+                        <Label
+                            htmlFor="theme_sidebar_tinted"
+                            className="font-normal"
+                        >
+                            Warnai sidebar mengikuti brand
+                        </Label>
+                    </div>
+
+                    <div className="grid gap-2">
                         <span className="text-xs text-muted-foreground">
                             Pratinjau
                         </span>
-                        <div className="flex flex-wrap gap-2">
-                            <span
-                                className="inline-flex h-9 items-center rounded-md px-4 text-sm font-medium"
-                                style={{
-                                    backgroundColor: primary,
-                                    color: foreground,
-                                }}
-                            >
-                                Tombol Utama
-                            </span>
-                            <span className="inline-flex h-9 items-center rounded-md border border-input px-4 text-sm">
-                                Tombol Sekunder
-                            </span>
+                        <div
+                            className="rounded-xl border p-4"
+                            style={{
+                                backgroundColor: isPreviewActive
+                                    ? preview['--background']
+                                    : undefined,
+                                color: textColor,
+                            }}
+                        >
+                            <div className="flex gap-3">
+                                <div
+                                    className="w-24 space-y-2 rounded-lg p-2"
+                                    style={{
+                                        backgroundColor: isPreviewActive
+                                            ? (preview['--sidebar'] ??
+                                              preview['--card'])
+                                            : undefined,
+                                    }}
+                                >
+                                    <div className="h-2 w-full rounded bg-current opacity-30" />
+                                    <div className="h-2 w-3/4 rounded bg-current opacity-20" />
+                                    <div className="h-2 w-2/3 rounded bg-current opacity-20" />
+                                </div>
+
+                                <div
+                                    className="flex-1 space-y-3 rounded-lg border p-3"
+                                    style={{
+                                        backgroundColor: isPreviewActive
+                                            ? preview['--card']
+                                            : undefined,
+                                    }}
+                                >
+                                    <div className="h-2 w-1/2 rounded bg-current opacity-30" />
+                                    <div
+                                        className="h-6 w-1/3 rounded-md"
+                                        style={{
+                                            backgroundColor: primary,
+                                            color: isPreviewActive
+                                                ? preview[
+                                                      '--primary-foreground'
+                                                  ]
+                                                : undefined,
+                                        }}
+                                    />
+                                    <div
+                                        className="flex h-8 items-center rounded-md px-2"
+                                        style={{
+                                            backgroundColor: isPreviewActive
+                                                ? preview['--muted']
+                                                : undefined,
+                                        }}
+                                    >
+                                        <span className="text-xs opacity-60">
+                                            Baris tabel (hover)
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

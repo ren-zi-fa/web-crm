@@ -16,10 +16,14 @@ class SettingsSeeder extends Seeder
             'app_name' => config('app.name', 'Laravel'),
             'logo_path' => null,
             'theme_primary' => null,
+            'theme_intensity' => '50',
+            'theme_sidebar_tinted' => '1',
         ];
 
         foreach ($defaults as $key => $value) {
             Setting::query()->firstOrCreate(['key' => $key], ['value' => $value]);
         }
+
+        Setting::flushCache();
     }
 }

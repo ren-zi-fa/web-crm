@@ -22,6 +22,8 @@ class BrandingUpdateRequest extends FormRequest
             'logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:2048'],
             'remove_logo' => ['nullable', 'boolean'],
             'theme_primary' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'theme_intensity' => ['nullable', 'integer', 'between:0,100'],
+            'theme_sidebar_tinted' => ['nullable', 'boolean'],
         ];
     }
 }

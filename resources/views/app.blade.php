@@ -1,50 +1,18 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         @php($branding = $page['props']['settings'] ?? [])
-
-        {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <script>
-            (function() {
-                const appearance = '{{ $appearance ?? "system" }}';
-
-                if (appearance === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-                    if (prefersDark) {
-                        document.documentElement.classList.add('dark');
-                    }
-                }
-            })();
-        </script>
+        @php($palette = $branding['theme_palette']['light'] ?? [])
 
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
                 background-color: oklch(1 0 0);
             }
-
-            html.dark {
-                background-color: oklch(0.145 0 0);
-            }
         </style>
-
-        @if(!empty($branding['theme_primary']))
-            {{-- Brand primary color stored in the database, mapped to shadcn variables --}}
-            <style>
-                :root {
-                    --primary: {{ $branding['theme_primary'] }};
-                    --primary-foreground: {{ $branding['theme_primary_foreground'] ?? 'oklch(0.985 0 0)' }};
-                    --ring: {{ $branding['theme_primary'] }};
-                    --sidebar-primary: {{ $branding['theme_primary'] }};
-                    --sidebar-primary-foreground: {{ $branding['theme_primary_foreground'] ?? 'oklch(0.985 0 0)' }};
-                    --sidebar-ring: {{ $branding['theme_primary'] }};
-                }
-            </style>
-        @endif
 
         <script>
             window.__APP_NAME__ = @json($branding['app_name'] ?? config('app.name'));
@@ -64,6 +32,16 @@
         <x-inertia::head>
             <title>{{ $branding['app_name'] ?? config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
+
+        {{-- Brand palette stored in the database, mapped to shadcn variables. Placed after the
+             compiled CSS so it always takes precedence over the default variables. --}}
+        <style id="branding-theme">
+            :root {
+                @foreach($palette as $token => $value)
+                    {{ $token }}: {{ $value }};
+                @endforeach
+            }
+        </style>
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />

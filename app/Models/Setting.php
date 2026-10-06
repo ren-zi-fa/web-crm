@@ -20,6 +20,16 @@ class Setting extends Model
     private const CACHE_KEY = 'settings.values';
 
     /**
+     * Dark mode surface base used when tinting brand colors.
+     */
+    private const DARK_BASE = '#0b0b0f';
+
+    /**
+     * Maximum tint strength (in percentage points) at intensity 100.
+     */
+    private const MAX_TINT = 8.0;
+
+    /**
      * Get every setting as a key/value array.
      *
      * @return array<string, string|null>
@@ -49,6 +59,14 @@ class Setting extends Model
     {
         self::query()->updateOrCreate(['key' => $key], ['value' => $value]);
 
+        self::flushCache();
+    }
+
+    /**
+     * Forget the cached settings so the next read hits the database.
+     */
+    public static function flushCache(): void
+    {
         Cache::forget(self::CACHE_KEY);
     }
 
@@ -69,26 +87,136 @@ class Setting extends Model
     }
 
     /**
+     * Build the light and dark CSS variable overrides for the active theme.
+     *
+     * @return array{light: array<string, string>, dark: array<string, string>}
+     */
+    public static function themePalette(): array
+    {
+        $primary = self::get('theme_primary');
+        $intensity = (int) self::get('theme_intensity', '50');
+
+        if (blank($primary) || $intensity <= 0) {
+            return ['light' => [], 'dark' => []];
+        }
+
+        $primary = self::normalizeHex($primary);
+        $tint = ($intensity / 100) * self::MAX_TINT;
+        $sidebarTinted = self::get('theme_sidebar_tinted', '1') === '1';
+
+        $darkPrimary = self::luminance($primary) < 0.45
+            ? self::mix($primary, '#ffffff', 20)
+            : $primary;
+
+        $light = [
+            '--primary' => $primary,
+            '--primary-foreground' => self::contrastForeground($primary),
+            '--ring' => $primary,
+            '--background' => self::mix($primary, '#ffffff', $tint),
+            '--card' => self::mix($primary, '#ffffff', $tint * 0.5),
+            '--popover' => self::mix($primary, '#ffffff', $tint * 0.5),
+            '--accent' => self::mix($primary, '#ffffff', $tint * 1.2),
+            '--secondary' => self::mix($primary, '#ffffff', $tint * 1.2),
+            '--muted' => self::mix($primary, '#ffffff', $tint),
+        ];
+
+        $dark = [
+            '--primary' => $darkPrimary,
+            '--primary-foreground' => self::contrastForeground($darkPrimary),
+            '--ring' => $darkPrimary,
+            '--background' => self::mix($primary, self::DARK_BASE, $tint),
+            '--card' => self::mix($primary, self::DARK_BASE, $tint * 0.7),
+            '--popover' => self::mix($primary, self::DARK_BASE, $tint * 0.7),
+            '--accent' => self::mix($primary, self::DARK_BASE, $tint * 1.2),
+            '--secondary' => self::mix($primary, self::DARK_BASE, $tint * 1.2),
+            '--muted' => self::mix($primary, self::DARK_BASE, $tint),
+        ];
+
+        if ($sidebarTinted) {
+            $light['--sidebar'] = self::mix($primary, '#ffffff', $tint * 0.8);
+            $light['--sidebar-accent'] = self::mix($primary, '#ffffff', $tint * 1.2);
+            $dark['--sidebar'] = self::mix($primary, self::DARK_BASE, $tint * 0.8);
+            $dark['--sidebar-accent'] = self::mix($primary, self::DARK_BASE, $tint * 1.2);
+        }
+
+        $light['--sidebar-primary'] = $primary;
+        $light['--sidebar-primary-foreground'] = self::contrastForeground($primary);
+        $light['--sidebar-ring'] = $primary;
+        $dark['--sidebar-primary'] = $darkPrimary;
+        $dark['--sidebar-primary-foreground'] = self::contrastForeground($darkPrimary);
+        $dark['--sidebar-ring'] = $darkPrimary;
+
+        return ['light' => $light, 'dark' => $dark];
+    }
+
+    /**
      * Pick a readable text color for the given hex background.
      */
     public static function contrastForeground(string $hex): string
     {
-        $hex = ltrim($hex, '#');
+        return self::luminance($hex) > 0.6
+            ? 'oklch(0.145 0 0)'
+            : 'oklch(0.985 0 0)';
+    }
 
-        if (strlen($hex) === 3) {
-            $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+    /**
+     * Mix a color into a base color by the given weight percentage.
+     */
+    public static function mix(string $color, string $base, float $percent): string
+    {
+        $ratio = max(0.0, min(100.0, $percent)) / 100;
+
+        [$redA, $greenA, $blueA] = self::rgb($color);
+        [$redB, $greenB, $blueB] = self::rgb($base);
+
+        $red = (int) round($redA * $ratio + $redB * (1 - $ratio));
+        $green = (int) round($greenA * $ratio + $greenB * (1 - $ratio));
+        $blue = (int) round($blueA * $ratio + $blueB * (1 - $ratio));
+
+        return sprintf('#%02x%02x%02x', $red, $green, $blue);
+    }
+
+    /**
+     * Relative luminance (0 dark - 1 light) of the given hex color.
+     */
+    public static function luminance(string $hex): float
+    {
+        [$red, $green, $blue] = self::rgb($hex);
+
+        return (0.2126 * $red + 0.7152 * $green + 0.0722 * $blue) / 255;
+    }
+
+    /**
+     * Normalize a hex color into the #rrggbb format.
+     */
+    public static function normalizeHex(string $hex): string
+    {
+        $value = ltrim(trim($hex), '#');
+
+        if (strlen($value) === 3) {
+            $value = $value[0].$value[0].$value[1].$value[1].$value[2].$value[2];
         }
 
-        if (strlen($hex) !== 6 || preg_match('/^[0-9a-fA-F]{6}$/', $hex) !== 1) {
-            return 'oklch(0.985 0 0)';
+        if (strlen($value) !== 6 || preg_match('/^[0-9a-fA-F]{6}$/', $value) !== 1) {
+            return '#000000';
         }
 
-        $red = hexdec(substr($hex, 0, 2)) / 255;
-        $green = hexdec(substr($hex, 2, 2)) / 255;
-        $blue = hexdec(substr($hex, 4, 2)) / 255;
+        return '#'.strtolower($value);
+    }
 
-        $luminance = 0.2126 * $red + 0.7152 * $green + 0.0722 * $blue;
+    /**
+     * Split a hex color into its red, green and blue channels.
+     *
+     * @return array{int, int, int}
+     */
+    private static function rgb(string $hex): array
+    {
+        $value = ltrim(self::normalizeHex($hex), '#');
 
-        return $luminance > 0.6 ? 'oklch(0.145 0 0)' : 'oklch(0.985 0 0)';
+        return [
+            (int) hexdec(substr($value, 0, 2)),
+            (int) hexdec(substr($value, 2, 2)),
+            (int) hexdec(substr($value, 4, 2)),
+        ];
     }
 }

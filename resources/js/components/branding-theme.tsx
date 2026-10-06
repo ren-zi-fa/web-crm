@@ -1,39 +1,30 @@
 import { usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
+import { paletteToCss } from '@/lib/color';
 
-const themeVariables = [
-    '--primary',
-    '--primary-foreground',
-    '--ring',
-    '--sidebar-primary',
-    '--sidebar-primary-foreground',
-    '--sidebar-ring',
-] as const;
+const STYLE_ID = 'branding-theme';
+const EMPTY: Record<string, string> = {};
 
 export default function BrandingTheme() {
     const { settings } = usePage().props;
+    const palette = settings?.theme_palette?.light ?? EMPTY;
 
     useEffect(() => {
-        const root = document.documentElement;
+        let element = document.getElementById(
+            STYLE_ID,
+        ) as HTMLStyleElement | null;
 
-        if (!settings?.theme_primary) {
-            themeVariables.forEach((variable) =>
-                root.style.removeProperty(variable),
-            );
-
-            return;
+        if (!element) {
+            element = document.createElement('style');
+            element.id = STYLE_ID;
         }
 
-        const foreground =
-            settings.theme_primary_foreground ?? 'oklch(0.985 0 0)';
+        element.textContent = paletteToCss(palette);
 
-        root.style.setProperty('--primary', settings.theme_primary);
-        root.style.setProperty('--primary-foreground', foreground);
-        root.style.setProperty('--ring', settings.theme_primary);
-        root.style.setProperty('--sidebar-primary', settings.theme_primary);
-        root.style.setProperty('--sidebar-primary-foreground', foreground);
-        root.style.setProperty('--sidebar-ring', settings.theme_primary);
-    }, [settings?.theme_primary, settings?.theme_primary_foreground]);
+        // Keep the override last in the head so it wins over the bundled CSS,
+        // including styles injected by Vite during development.
+        document.head.appendChild(element);
+    }, [palette]);
 
     return null;
 }
