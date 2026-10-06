@@ -3,6 +3,13 @@ export type Option = {
     label: string;
 };
 
+export type AppSettings = {
+    app_name: string;
+    logo_url: string | null;
+    theme_primary: string | null;
+    theme_primary_foreground: string | null;
+};
+
 export type UserRef = {
     id: number;
     name: string;

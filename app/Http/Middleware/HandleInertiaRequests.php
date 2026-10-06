@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,11 +38,29 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => Setting::get('app_name') ?: config('app.name'),
+            'settings' => fn (): array => $this->sharedSettings(),
             'auth' => [
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        ];
+    }
+
+    /**
+     * Share the application branding configuration with every response.
+     *
+     * @return array<string, string|null>
+     */
+    protected function sharedSettings(): array
+    {
+        $primary = Setting::get('theme_primary');
+
+        return [
+            'app_name' => Setting::get('app_name') ?: config('app.name'),
+            'logo_url' => Setting::logoUrl(),
+            'theme_primary' => $primary,
+            'theme_primary_foreground' => filled($primary) ? Setting::contrastForeground($primary) : null,
         ];
     }
 }

@@ -1,4 +1,5 @@
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import BrandingTheme from '@/components/branding-theme';
 import type { BreadcrumbItem } from '@/types';
 
 export default function AppLayout({
@@ -10,6 +11,7 @@ export default function AppLayout({
 }) {
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs}>
+            <BrandingTheme />
             {children}
         </AppLayoutTemplate>
     );
