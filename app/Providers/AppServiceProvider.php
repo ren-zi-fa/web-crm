@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Contact;
+use App\Models\Deal;
+use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +29,29 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureAuthorization();
+        $this->configureMorphMap();
+    }
+
+    /**
+     * Grant every ability to administrators.
+     */
+    protected function configureAuthorization(): void
+    {
+        Gate::before(
+            fn (User $user): ?bool => $user->hasRole('admin') ? true : null,
+        );
+    }
+
+    /**
+     * Register stable aliases for polymorphic relations.
+     */
+    protected function configureMorphMap(): void
+    {
+        Relation::morphMap([
+            'contact' => Contact::class,
+            'deal' => Deal::class,
+        ]);
     }
 
     /**

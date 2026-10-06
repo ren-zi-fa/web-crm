@@ -1,5 +1,12 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    Activity,
+    Briefcase,
+    CheckSquare,
+    KanbanSquare,
+    LayoutGrid,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,6 +21,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as activitiesIndex } from '@/routes/activities';
+import { index as contactsIndex } from '@/routes/contacts';
+import { index as dealsIndex } from '@/routes/deals';
+import { index as pipelineIndex } from '@/routes/pipeline';
+import { index as tasksIndex } from '@/routes/tasks';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -22,20 +34,34 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'Kontak',
+        href: contactsIndex(),
+        icon: Users,
+    },
+    {
+        title: 'Pipeline',
+        href: pipelineIndex(),
+        icon: KanbanSquare,
+    },
+    {
+        title: 'Deals',
+        href: dealsIndex(),
+        icon: Briefcase,
+    },
+    {
+        title: 'Tugas',
+        href: tasksIndex(),
+        icon: CheckSquare,
+    },
+    {
+        title: 'Aktivitas',
+        href: activitiesIndex(),
+        icon: Activity,
+    },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     return (
